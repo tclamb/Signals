@@ -14,7 +14,7 @@ public:
 
     void connect(FunctionType f);
 
-    void operator()(ArgTypes...) const;
+    ReturnType operator()(ArgTypes...) const;
 
 private:
     std::vector<FunctionType> slots;
@@ -27,7 +27,35 @@ void Signal<ReturnType(ArgTypes...)>::connect(FunctionType f)
 }
 
 template<typename ReturnType, typename... ArgTypes>
-void Signal<ReturnType(ArgTypes...)>::operator()(ArgTypes... args) const
+ReturnType Signal<ReturnType(ArgTypes...)>::operator()(ArgTypes... args) const
+{
+    ReturnType result = {};
+    for(auto const& f : slots)
+        result = f(std::forward<ArgTypes...>(args)...);
+    return result;
+}
+
+// gotta partially specialize for void functions :(
+
+template<typename... ArgTypes>
+class Signal<void(ArgTypes...)>
+{
+public:
+    typedef std::function<void(ArgTypes...)> FunctionType;
+    void connect(FunctionType f);
+    void operator()(ArgTypes...) const;
+private:
+    std::vector<FunctionType> slots;
+};
+
+template<typename... ArgTypes>
+void Signal<void(ArgTypes...)>::connect(FunctionType f)
+{
+    slots.push_back(f);
+}
+
+template<typename... ArgTypes>
+void Signal<void(ArgTypes...)>::operator()(ArgTypes... args) const
 {
     for(auto const& f : slots)
         f(std::forward<ArgTypes...>(args)...);
