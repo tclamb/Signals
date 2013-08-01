@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <vector>
+#include <type_traits>
 
 template<typename T> class Signal {};
 
@@ -12,53 +13,30 @@ class Signal<ReturnType(ArgTypes...)>
 public:
     typedef std::function<ReturnType(ArgTypes...)> FunctionType;
 
-    void connect(FunctionType f);
+    void connect(FunctionType f) {
+        slots.push_back(f);
+    };
 
-    ReturnType operator()(ArgTypes...) const;
+    template<typename = typename std::enable_if<std::is_void<ReturnType>::value>::type>
+    void operator()(ArgTypes... args) const {
+        for(auto const& f : slots) {
+            f(std::forward<ArgTypes...>(args)...);
+        }
+    };
+
+    template<typename RetType = typename std::enable_if<!std::is_void<ReturnType>::value, ReturnType>::type>
+    RetType operator()(ArgTypes... args) const {
+        if(slots.size() == 0)
+            return {};
+        for(auto f = slots.cbegin();; ++f) {
+            if(next(f) == slots.cend())
+                return (*f)(std::forward<ArgTypes...>(args)...);
+            (*f)(std::forward<ArgTypes...>(args)...);
+        }
+    };
 
 private:
     std::vector<FunctionType> slots;
 };
-
-template<typename ReturnType, typename... ArgTypes>
-void Signal<ReturnType(ArgTypes...)>::connect(FunctionType f)
-{
-    slots.push_back(f);
-}
-
-template<typename ReturnType, typename... ArgTypes>
-ReturnType Signal<ReturnType(ArgTypes...)>::operator()(ArgTypes... args) const
-{
-    ReturnType result = {};
-    for(auto const& f : slots)
-        result = f(std::forward<ArgTypes...>(args)...);
-    return result;
-}
-
-// gotta partially specialize for void functions :(
-
-template<typename... ArgTypes>
-class Signal<void(ArgTypes...)>
-{
-public:
-    typedef std::function<void(ArgTypes...)> FunctionType;
-    void connect(FunctionType f);
-    void operator()(ArgTypes...) const;
-private:
-    std::vector<FunctionType> slots;
-};
-
-template<typename... ArgTypes>
-void Signal<void(ArgTypes...)>::connect(FunctionType f)
-{
-    slots.push_back(f);
-}
-
-template<typename... ArgTypes>
-void Signal<void(ArgTypes...)>::operator()(ArgTypes... args) const
-{
-    for(auto const& f : slots)
-        f(std::forward<ArgTypes...>(args)...);
-}
 
 #endif
