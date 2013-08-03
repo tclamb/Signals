@@ -69,7 +69,6 @@ TEST_CASE("boost/2", "Boost Example 2: Connecting Multiple Slots")
     CHECK(out.str() == "Hello, World!\n");
 }
 
-#ifdef EXAMPLE3
 namespace
 {
     struct GoodMorning
@@ -97,7 +96,6 @@ TEST_CASE("boost/3", "Boost Example 3: Ordering Slot Call Groups")
 
     CHECK(out.str() == "Hello, World!\n... and good morning!\n");
 }
-#endif
 
 namespace
 {
