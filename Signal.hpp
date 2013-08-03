@@ -18,20 +18,20 @@ public:
     };
 
     template<typename = typename std::enable_if<std::is_void<ReturnType>::value>::type>
-    void operator()(ArgTypes... args) const {
+    void operator()(ArgTypes&&... args) const {
         for(auto const& f : slots) {
-            f(std::forward<ArgTypes...>(args)...);
+            f(std::forward<ArgTypes>(args)...);
         }
     };
 
     template<typename RetType = typename std::enable_if<!std::is_void<ReturnType>::value, ReturnType>::type>
-    RetType operator()(ArgTypes... args) const {
+    RetType operator()(ArgTypes&&... args) const {
         if(slots.size() == 0)
             return {};
         for(auto f = slots.cbegin();; ++f) {
             if(next(f) == slots.cend())
-                return (*f)(std::forward<ArgTypes...>(args)...);
-            (*f)(std::forward<ArgTypes...>(args)...);
+                return (*f)(std::forward<ArgTypes>(args)...);
+            (*f)(std::forward<ArgTypes>(args)...);
         }
     };
 
