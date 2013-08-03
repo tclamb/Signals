@@ -5,15 +5,18 @@
 
 #include <sstream>
 
-struct HelloWorld
+namespace
 {
-    std::ostream& out;
-
-    void operator()() const
+    struct HelloWorld
     {
-        out << "Hello, World!\n";
-    }
-};
+        std::ostream& out;
+
+        void operator()() const
+        {
+            out << "Hello, World!\n";
+        }
+    };
+}
 
 TEST_CASE("boost/1", "Boost Example 1: Hello World!")
 {
@@ -29,25 +32,28 @@ TEST_CASE("boost/1", "Boost Example 1: Hello World!")
     CHECK(out.str() == "Hello, World!\n");
 }
 
-struct Hello
+namespace
 {
-    std::ostream& out;
-
-    void operator()() const
+    struct Hello
     {
-        out << "Hello";
-    }
-};
+        std::ostream& out;
 
-struct World
-{
-    std::ostream& out;
+        void operator()() const
+        {
+            out << "Hello";
+        }
+    };
 
-    void operator()() const
+    struct World
     {
-        out << ", World!\n";
-    }
-};
+        std::ostream& out;
+
+        void operator()() const
+        {
+            out << ", World!\n";
+        }
+    };
+}
 
 TEST_CASE("boost/2", "Boost Example 2: Connecting Multiple Slots")
 {
@@ -64,15 +70,18 @@ TEST_CASE("boost/2", "Boost Example 2: Connecting Multiple Slots")
 }
 
 #ifdef EXAMPLE3
-struct GoodMorning
+namespace
 {
-    std::ostream& out;
-
-    void operator()() const
+    struct GoodMorning
     {
-        out << "... and good morning!\n"
-    }
-};
+        std::ostream& out;
+
+        void operator()() const
+        {
+            out << "... and good morning!\n";
+        }
+    };
+}
 
 TEST_CASE("boost/3", "Boost Example 3: Ordering Slot Call Groups")
 {
@@ -90,35 +99,43 @@ TEST_CASE("boost/3", "Boost Example 3: Ordering Slot Call Groups")
 }
 #endif
 
-std::stringstream out4;
-
-void print_args(float x, float y)
+namespace
 {
-  out4 << "The arguments are " << x << " and " << y << '\n';
-}
+    namespace BoostExampleFour
+    {
+        static std::stringstream out;
 
-void print_sum(float x, float y)
-{
-  out4 << "The sum is " << x + y << '\n';
-}
+        static void print_args(float x, float y)
+        {
+            out << "The arguments are " << x << " and " << y << '\n';
+        };
 
-void print_product(float x, float y)
-{
-  out4 << "The product is " << x * y << '\n';
-}
+        static void print_sum(float x, float y)
+        {
+            out << "The sum is " << x + y << '\n';
+        };
 
-void print_difference(float x, float y)
-{
-  out4 << "The difference is " << x - y << '\n';
-}
+        static void print_product(float x, float y)
+        {
+            out << "The product is " << x * y << '\n';
+        };
 
-void print_quotient(float x, float y)
-{
-  out4 << "The quotient is " << x / y << '\n';
+        static void print_difference(float x, float y)
+        {
+            out << "The difference is " << x - y << '\n';
+        };
+
+        static void print_quotient(float x, float y)
+        {
+            out << "The quotient is " << x / y << '\n';
+        };
+    }
 }
 
 TEST_CASE("boost/4", "Boost Example 4: Slot Arguments")
 {
+    using namespace BoostExampleFour;
+
     Signal<void(float, float)> sig;
 
     sig.connect(&print_args);
@@ -129,7 +146,36 @@ TEST_CASE("boost/4", "Boost Example 4: Slot Arguments")
 
     sig(5., 3.);
 
-    CHECK(out4.str() == "The arguments are 5 and 3\nThe sum is 8\n"
-                        "The product is 15\nThe difference is 2\n"
-                        "The quotient is 1.66667\n");
+    CHECK(out.str() == "The arguments are 5 and 3\nThe sum is 8\n"
+            "The product is 15\nThe difference is 2\n"
+            "The quotient is 1.66667\n");
 }
+
+/* TODO: Custom Combiners */
+namespace
+{
+    namespace BoostExampleFive
+    {
+        static std::stringstream out;
+
+        static float product(float x, float y) { return x * y; };
+        static float quotient(float x, float y) { return x / y; };
+        static float sum(float x, float y) { return x + y; };
+        static float difference(float x, float y) { return x - y; };
+    }
+}
+
+TEST_CASE("boost/5", "Boost Example 5: Signal Return Values")
+{
+    using namespace BoostExampleFive;
+
+    Signal<float(float, float)> sig;
+
+    sig.connect(&product);
+    sig.connect(&quotient);
+    sig.connect(&sum);
+    sig.connect(&difference);
+
+    CHECK(sig(5, 3) == 5. - 3.);
+}
+
