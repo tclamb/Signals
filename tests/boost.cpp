@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "catch.h"
 
-#include "../Signal.hpp"
+#include "../Signal.h"
 
 #include <sstream>
 

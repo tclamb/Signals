@@ -1,4 +1,4 @@
-#include "../Signal.hpp"
+#include "../Signal.h"
 #include <iostream>
 
 struct HelloWorld
