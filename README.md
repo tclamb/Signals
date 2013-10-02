@@ -1,8 +1,9 @@
-=Signals=
+#Signals
 A "lightweight" C++11 implementation of most of Boost.Signal2's interface.
 
-==Example Usage==
-===Hello World===
+##Example Usage
+###Hello World
+
 ```cpp
 // Create a signal accepting void(void) function objects
 Signal<void()> simpleSignal;
@@ -17,7 +18,7 @@ simpleSignal.connect(helloWorld);
 simpleSignal();
 ```
 
-===Call Groups===
+###Call Groups
 ```cpp
 // Create a signal accepting void(void) function objects
 Signal<void()> simpleSignal;
@@ -32,7 +33,7 @@ simpleSignal.connect(0, []() { std::cout << "Hello"; });
 simpleSignal();
 ```
 
-===Return Values===
+###Return Values
 ```cpp
 // Create a signal accepting float(float, float) function objects
 Signal<float(float, float)> mathSignal;
